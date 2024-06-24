@@ -14,21 +14,21 @@ func main() {
 	service.HandleStatic("/static/", "./static/")
 
 	service.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		service.Infof(r, "requested '%s'", r.URL)
+		run.Infof(r, "requested '%s'", r.URL)
 
 		tmpl, err := template.ParseFiles("templates/index.html")
 		if err != nil {
-			service.Criticalf(r, "cannot load template: %v", err)
+			run.Criticalf(r, "cannot load template: %v", err)
 		}
 		tmpl.Execute(w, nil)
 	})
 
-	service.ShutdownFunc(func(ctx context.Context, s *run.Service) {
+	service.ShutdownFunc(func(ctx context.Context) {
 		// TODO: Clean up
 	})
 
-	err := service.ListenAndServe()
+	err := service.ListenAndServeHTTP()
 	if err != nil {
-		service.Fatal(nil, err)
+		run.Fatal(nil, err)
 	}
 }
