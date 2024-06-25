@@ -9,11 +9,12 @@ import (
 )
 
 func main() {
-	service := run.NewService()
+	http.Handle(
+		"/static/",
+		http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))),
+	)
 
-	service.HandleStatic("/static/", "./static/")
-
-	service.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		run.Infof(r, "requested '%s'", r.URL)
 
 		tmpl, err := template.ParseFiles("templates/index.html")
@@ -23,11 +24,11 @@ func main() {
 		tmpl.Execute(w, nil)
 	})
 
-	service.ShutdownFunc(func(ctx context.Context) {
+	shutdown := func(ctx context.Context) {
 		// TODO: Clean up
-	})
+	}
 
-	err := service.ListenAndServeHTTP()
+	err := run.ServeHTTP(shutdown, nil)
 	if err != nil {
 		run.Fatal(nil, err)
 	}
